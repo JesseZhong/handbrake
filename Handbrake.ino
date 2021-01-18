@@ -1,31 +1,38 @@
 #include <HX711.h>
 #include <Joystick.h>
 
+// Pinning.
 const int dataPin = 3;
 const int clockPin = 2;
-const int ledPin = 13;
+const int ledPin = 4;
 
-const int scaleSamples = 10;
+// Load cell settings.
+const int loadSamples = 6;
+const float loadScale = 4.f;
+const long loadOffset = 0;
+
+// LED settings.
 const int ledThreshold = 30;
 
+HX711 loadCell;
 Joystick_ Joystick;
-HX711 scale;
 
 void setup() {
   // Setup indicator LED.
   pinMode(ledPin, OUTPUT);
 
   // Setup load cell.
-  scale.begin(dataPin, clockPin);
-  scale.set_scale();
-  scale.tare();
+  loadCell.begin(dataPin, clockPin);
+  loadCell.set_scale(loadScale);
+  loadCell.set_offset(loadOffset);
+  //loadCell.tare();
   
   Joystick.begin();
 }
 
 void loop() {
-  int raw = scale.get_units(scaleSamples);
-  Serial.print(raw, 1);
+  int raw = loadCell.get_value(loadSamples);
+  Serial.print(raw);
   Serial.println();
 
   // Map load cell output to intended range.
