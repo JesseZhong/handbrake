@@ -7,9 +7,9 @@ const int clockPin = 2;
 const int ledPin = 4;
 
 // Load cell settings.
-const int loadSamples = 6;
-const float loadScale = 4.f;
-const long loadOffset = 0;
+const int loadSamples = 4;
+const float loadScale = 400.f; // If scale is too low, there's a short overflow.
+const long loadOffset = 90;
 
 // LED settings.
 const int ledThreshold = 30;
@@ -25,15 +25,14 @@ void setup() {
   loadCell.begin(dataPin, clockPin);
   loadCell.set_scale(loadScale);
   loadCell.set_offset(loadOffset);
-  //loadCell.tare();
+  loadCell.tare();
   
   Joystick.begin();
 }
 
 void loop() {
-  int raw = loadCell.get_value(loadSamples);
-  Serial.print(raw);
-  Serial.println();
+  // Get scaled and offset value.
+  int raw = loadCell.get_units(loadSamples);
 
   // Map load cell output to intended range.
   int value = map(raw, 0, 2500, 0, 255);
@@ -45,6 +44,11 @@ void loop() {
   else {
     digitalWrite(ledPin, LOW);
   }
+
+  Serial.print("Raw: ");
+  Serial.print(raw);
+  Serial.print(", Adjusted: ");
+  Serial.println(value);
 
   // Set the throttle value the mapped.
   Joystick.setThrottle(value);
