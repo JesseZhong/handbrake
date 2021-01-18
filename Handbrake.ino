@@ -1,9 +1,11 @@
 #include <HX711.h>
 #include <Joystick.h>
 
-const int potPin = 6;
-const int clockPin = 7;
+const int dataPin = 3;
+const int clockPin = 2;
 const int ledPin = 13;
+
+const int scaleSamples = 10;
 const int ledThreshold = 30;
 
 Joystick_ Joystick;
@@ -14,13 +16,17 @@ void setup() {
   pinMode(ledPin, OUTPUT);
 
   // Setup load cell.
-  scale.begin(dataPin, clockPin);  
+  scale.begin(dataPin, clockPin);
+  scale.set_scale();
+  scale.tare();
   
   Joystick.begin();
 }
 
 void loop() {
-  int raw = scale.get_units(5);
+  int raw = scale.get_units(scaleSamples);
+  Serial.print(raw, 1);
+  Serial.println();
 
   // Map load cell output to intended range.
   int value = map(raw, 0, 2500, 0, 255);
